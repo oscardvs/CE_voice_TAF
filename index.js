@@ -26,22 +26,6 @@ fastify.register(fastifyWs);
 const SYSTEM_MESSAGE = `
 ### Role
 You are an AI assistant named Kim, working at The Aviation Factory. Your role is to assist clients with booking private charter flights and answer any questions they may have about the service. You will guide clients through the process of booking their flights, providing quotes, and offering support as needed.
-
-### Persona
-- You have been an agent at The Aviation Factory for over 5 years.
-- You are knowledgeable about private aviation services, including flight routes, pricing, and scheduling.
-- Your tone is friendly, professional, and efficient.
-- You keep conversations focused and concise, bringing them back on topic if necessary.
-- You ask only one question at a time and respond promptly to avoid wasting the customer's time.
-
-### Handling FAQs
-Use the function \`question_and_answer\` to respond to common customer queries.
-
-### Booking a Flight
-1. Ask for the departure city, arrival city, and preferred date.
-2. Confirm the flight duration or request an estimate of how long the client wishes to fly.
-3. If the client asks for pricing, retrieve available quotes from the flight database.
-4. Use the \`book_flight\` function to finalize the booking once all details are gathered.
 `;
 
 const VOICE = 'alloy';
@@ -64,7 +48,7 @@ const LOG_EVENT_TYPES = [
     'conversation.item.input_audio_transcription.completed'
 ];
 
-// Root Route
+// Root Route to handle GET /
 fastify.get('/', async (request, reply) => {
     reply.send({ message: 'Twilio Media Stream Server is running!' });
 });
@@ -75,7 +59,6 @@ fastify.all('/incoming-call', async (request, reply) => {
 
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
                           <Response>
-                              <Say>Hi, welcome to The Aviation Factory, how may I help you today?</Say>
                               <Connect>
                                   <Stream url="wss://${request.headers.host}/media-stream" />
                               </Connect>
@@ -271,53 +254,53 @@ async function fetchFlightData(departure, arrival, date) {
                 arrival,
                 date
             })
-        });
+            });
 
-        const data = await response.json();
-        if (response.ok) {
+            const data = await response.json();
+            if (response.ok) {
             console.log('Flight data received:', data);
             return data;
-        } else {
+            } else {
             console.error('Failed to fetch flight data:', response.statusText);
             return null;
-        }
-    } catch (error) {
-        console.error('Error fetching flight data:', error);
-        return null;
-    }
-}
+            }
+            } catch (error) {
+            console.error('Error fetching flight data:', error);
+            return null;
+            }
+            }
 
-// Function to send flight data to client or webhook
-async function sendToWebhook(payload) {
-    console.log('Sending data to webhook:', JSON.stringify(payload, null, 2));
-    try {
-        const response = await fetch(WEBHOOK_URL, {
+            // Function to send flight data to client or webhook
+            async function sendToWebhook(payload) {
+            console.log('Sending data to webhook:', JSON.stringify(payload, null, 2));
+            try {
+            const response = await fetch(WEBHOOK_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
-        });
+            });
 
-        console.log('Webhook response status:', response.status);
-        if (response.ok) {
+            console.log('Webhook response status:', response.status);
+            if (response.ok) {
             console.log('Data successfully sent to webhook.');
-        } else {
+            } else {
             console.error('Failed to send data to webhook:', response.statusText);
-        }
-    } catch (error) {
-        console.error('Error sending data to webhook:', error);
-    }
-}
+            }
+            } catch (error) {
+            console.error('Error sending data to webhook:', error);
+            }
+            }
 
-// Main function to extract and send customer details
-async function processTranscriptAndSend(transcript, sessionId = null) {
-    console.log(`Starting transcript processing for session ${sessionId}...`);
-    try {
-        // Make the ChatGPT completion call
-        const result = await makeChatGPTCompletion(transcript);
+            // Main function to extract and send customer details
+            async function processTranscriptAndSend(transcript, sessionId = null) {
+            console.log(`Starting transcript processing for session ${sessionId}...`);
+            try {
+            // Make the ChatGPT completion call
+            const result = await makeChatGPTCompletion(transcript);
 
-        if (result.choices && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
+            if (result.choices && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
             const parsedContent = JSON.parse(result.choices[0].message.content);
 
             if (parsedContent) {
@@ -336,12 +319,15 @@ async function processTranscriptAndSend(transcript, sessionId = null) {
             } else {
                 console.error('Unexpected JSON structure in ChatGPT response');
             }
-        } else {
+            } else {
             console.error('Unexpected response structure from ChatGPT API');
-        }
+            }
 
-    } catch (error) {
-        console.error('Error in processTranscriptAndSend:', error);
-    }
-}
+            } catch (error) {
+            console.error('Error in processTranscriptAndSend:', error);
+            }
+            }
+
+
+
 
