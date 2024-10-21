@@ -1,0 +1,1 @@
+{"version":2,"languages":{"nodejs-npm":{"specfileHash":"3108b61a1ba3534267e785f98bfb2f05","lockfileHash":"99f4012d5b43ed9a1b336e5564132409","guessedImports":["node-fetch","fastify","ws","dotenv","@fastify/formbody","@fastify/websocket"],"guessedImportsHash":"daea74935594d298f908a05edd15bbeb"}}}
